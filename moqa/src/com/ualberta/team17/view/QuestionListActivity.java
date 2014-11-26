@@ -110,6 +110,7 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 	
 	private void selectItem(int position) {
 		activeTaxonomy = position;
+		searchMode = false;
 		
 		// update the main content by replacing fragments
 		String[] myTaxonomy = getResources().getStringArray(R.array.taxonomies);
@@ -158,10 +159,6 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 		if (id == R.id.action_new_question) {
 			fragment.createNewQuestion();
 			return true;
-		}
-		if (id == R.id.action_sort_date) {
-			fragment.applyDateSort(item);
-			return true;
 		}	
 		return super.onOptionsItemSelected(item);
 	}
@@ -170,9 +167,13 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 	public void onItemSelected(int position) {
 		selectItem(position);
 	}
-
-	public void search(String searchTerm) {
-		
+	
+	/**
+	 * Sets whether the list is displaying a search.
+	 * @param val
+	 */
+	public void setSearchMode(boolean val) {
+		searchMode = val;
 	}
 	
 	public class SortMenuFragment extends Fragment {
@@ -243,7 +244,7 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 						fragment.setArguments(args);
 						fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 						setTitle(getResources().getText(R.string.action_search));
-																	
+						QuestionListActivity.this.setSearchMode(true);					
 					}
 					else {
 						// Show the bar and activate it

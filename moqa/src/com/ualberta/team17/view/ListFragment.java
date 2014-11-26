@@ -77,7 +77,6 @@ public class ListFragment extends Fragment {
 			
 			datafilter = new DataFilter();
 			datafilter.setTypeFilter(ItemType.Question);
-			datafilter.setMaxResults(MAX_RESULTS);
 			datafilter.addFieldFilter(AuthoredTextItem.FIELD_BODY, searchTerm, 
 					DataFilter.FilterComparison.QUERY_STRING, DataFilter.CombinationMode.SHOULD);
 			datafilter.addFieldFilter(QuestionItem.FIELD_TITLE, searchTerm, 
@@ -157,7 +156,6 @@ public class ListFragment extends Fragment {
 	 * Creates an intent that is passed to QuestionViewActivity.
 	 * This allows for a new question to be created.
 	 * 
-	 * @author Jared
 	 */
 	void createNewQuestion() {
 		Intent intent = new Intent(ListFragment.this.getActivity(), QuestionViewActivity.class);		
@@ -205,18 +203,9 @@ public class ListFragment extends Fragment {
 	}
 	
 	/**
-	 * Activates search.
-	 * TODO implement search().
-	 */
-	void search() {
-		
-	}
-	
-	/**
 	 * A convenience function for adding an observer to ir.
 	 * @param ir The incremental result to observe.
 	 * 
-	 * @author Jared
 	 */
 	private void addObserver(IncrementalResult ir) {
 		
