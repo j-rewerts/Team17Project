@@ -88,6 +88,7 @@ public class ListFragment extends Fragment {
 			comp = new DateComparator();
 			datafilter.setTypeFilter(ItemType.Question);
 			mIR = QAController.getInstance().getObjects(datafilter, comp);
+			
 			break;
 		case 1:
 			comp = new DateComparator();
