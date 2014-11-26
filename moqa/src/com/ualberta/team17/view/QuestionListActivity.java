@@ -3,6 +3,7 @@ package com.ualberta.team17.view;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -11,10 +12,13 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
+
 import com.ualberta.team17.R;
 import com.ualberta.team17.view.TaxonomyMenuFragment.OnItemSelectedListener;
 
@@ -28,6 +32,8 @@ import com.ualberta.team17.view.TaxonomyMenuFragment.OnItemSelectedListener;
  *
  */
 public class QuestionListActivity extends Activity implements OnItemSelectedListener{
+	public final static String SEARCH_TERM = "search_term";
+	
 	private String[] sortOptions;
 	private DrawerLayout rightDrawerLayout;
 	private ListView rightDrawerList;
@@ -35,6 +41,8 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 	TaxonomyMenuFragment leftDrawer = new TaxonomyMenuFragment();
 	SortMenuFragment rightDrawer = new SortMenuFragment();
 	ListFragment fragment = new ListFragment();
+	private int activeTaxonomy;
+	boolean searchMode = false;
 
 	/**
 	 * Initializes data depending on what is passed in the intent. Creates adapters and
@@ -51,7 +59,27 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 			fragmentManager.beginTransaction().add(R.id.content_frame, leftDrawer).commit();
 			fragmentManager.beginTransaction().replace(R.id.content_frame, rightDrawer).commit();
 		}
+		
+		Intent intent = this.getIntent();
+		
+		if (intent == null) {
+			return;
+		}
+		
+		if (intent.getSerializableExtra(SEARCH_TERM) != null) {
+			searchMode = true;
+			String searchValue = (String) intent.getSerializableExtra(SEARCH_TERM);	
+			
+			Bundle args = new Bundle();
+			args.putString(SEARCH_TERM, searchValue);
+			fragment = new ListFragment();
+			FragmentManager fragmentManager = getFragmentManager();
+			fragment.setArguments(args);
+			fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+			setTitle(getResources().getText(R.string.action_search));
+		}
 	}
+	
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
 		super.onPostCreate(savedInstanceState);
@@ -59,7 +87,30 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 		leftDrawer.mDrawerToggle.syncState();
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		if (fragment != null) {
+			if (searchMode) {
+				return;
+			}
+			
+			// update the main content by replacing fragments
+			String[] myTaxonomy = getResources().getStringArray(R.array.taxonomies);
+			Bundle args = new Bundle();
+			args.putInt(ListFragment.TAXONOMY_NUM, activeTaxonomy);
+			fragment = new ListFragment();
+			FragmentManager fragmentManager = getFragmentManager();
+			fragment.setArguments(args);
+			fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+			setTitle(myTaxonomy[activeTaxonomy]);
+		}
+	}
+	
 	private void selectItem(int position) {
+		activeTaxonomy = position;
+		
 		// update the main content by replacing fragments
 		String[] myTaxonomy = getResources().getStringArray(R.array.taxonomies);
 		Bundle args = new Bundle();
@@ -87,6 +138,8 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 		MenuItem mi = menu.findItem(R.id.action_search);
 		SearchItem si = new SearchItem(this.getBaseContext());
 		mi.setActionView(si);
+		
+		si.setOnClickListener(new SearchClickedListener());
 		return true;
 	}
 
@@ -113,7 +166,15 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 		return super.onOptionsItemSelected(item);
 	}
 
+	@Override
+	public void onItemSelected(int position) {
+		selectItem(position);
+	}
 
+	public void search(String searchTerm) {
+		
+	}
+	
 	public class SortMenuFragment extends Fragment {
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
@@ -148,9 +209,49 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 
 	}
 	
-	@Override
-	public void onItemSelected(int position) {
-		selectItem(position);
-	}
+	
+	
+	/**
+	 * Triggered whenever the search button is clicked.
+	 * 
+	 * @author Jared
+	 *
+	 */
+	private class SearchClickedListener implements OnClickListener {
+		
+		@Override
+		public void onClick(View view) {
 
+			ViewGroup g = (ViewGroup) view.getParent();
+			if (g != null) {
+				
+				EditText et = (EditText) g.findViewById(R.id.searchBar);
+				if (et != null) {
+					
+					if (et.isShown()) {
+						et.setVisibility(View.GONE);
+						
+						String searchTerm = et.getText().toString();
+						if (searchTerm.equals("")) {
+							return;
+						}						
+
+						Bundle args = new Bundle();
+						args.putString(SEARCH_TERM, searchTerm);
+						fragment = new ListFragment();
+						FragmentManager fragmentManager = getFragmentManager();
+						fragment.setArguments(args);
+						fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+						setTitle(getResources().getText(R.string.action_search));
+																	
+					}
+					else {
+						// Show the bar and activate it
+						et.setVisibility(View.VISIBLE);
+						et.setSelected(true);
+					}							
+				}
+			}					
+		}
+	}
 }

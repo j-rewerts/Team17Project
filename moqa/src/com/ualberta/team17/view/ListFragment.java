@@ -1,6 +1,5 @@
 package com.ualberta.team17.view;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.annotation.TargetApi;
@@ -13,12 +12,12 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.ualberta.team17.AnswerItem;
 import com.ualberta.team17.AuthoredItem;
 import com.ualberta.team17.AuthoredTextItem;
 import com.ualberta.team17.ItemType;
@@ -27,23 +26,20 @@ import com.ualberta.team17.QuestionItem;
 import com.ualberta.team17.R;
 import com.ualberta.team17.controller.QAController;
 import com.ualberta.team17.datamanager.DataFilter;
+import com.ualberta.team17.datamanager.DataFilter.FilterComparison;
 import com.ualberta.team17.datamanager.IIncrementalObserver;
 import com.ualberta.team17.datamanager.IItemComparator;
-import com.ualberta.team17.datamanager.DataFilter.FilterComparison;
 import com.ualberta.team17.datamanager.IItemComparator.SortDirection;
 import com.ualberta.team17.datamanager.IncrementalResult;
 import com.ualberta.team17.datamanager.comparators.DateComparator;
+import com.ualberta.team17.datamanager.comparators.IdentityComparator;
 import com.ualberta.team17.datamanager.comparators.UpvoteComparator;
-
 @TargetApi(14)
 public class ListFragment extends Fragment {
 	public static final String TAXONOMY_NUM = "taxonomy_number";
 	public static final String FILTER_EXTRA = "FILTER";
-	
+	private static final int MAX_RESULTS = 10000;
 	private IncrementalResult mIR;
-	private DataFilter datafilter = new DataFilter();
-	private QuestionListAdapter mAdapter;
-	private List<QAModel> mItems;
 	
 	@Override
     public void onAttach(Activity activity) {
@@ -54,34 +50,60 @@ public class ListFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.activity_question_list, container, false);
-	    int mTaxonomy = getArguments().getInt(TAXONOMY_NUM);
+        
+        
+        
+	    int mTaxonomy = getArguments().getInt(TAXONOMY_NUM, -1);
 	    
 		IItemComparator comp;
+		DataFilter df = new DataFilter();
 		
 		switch (mTaxonomy) {
+		case -1:
+			// This means it wasn't sent by a taxonomy.
+			// Must be a search.
+			String searchTerm = getArguments().getString(QuestionListActivity.SEARCH_TERM);
+			
+			if (searchTerm == null) {
+				break;
+			}
+			
+			comp = new IdentityComparator();
+			
+			df = new DataFilter();
+			df.setTypeFilter(ItemType.Question);
+			df.setMaxResults(MAX_RESULTS);
+			df.addFieldFilter(AuthoredTextItem.FIELD_BODY, searchTerm, 
+					DataFilter.FilterComparison.QUERY_STRING, DataFilter.CombinationMode.SHOULD);
+			df.addFieldFilter(QuestionItem.FIELD_TITLE, searchTerm, 
+					DataFilter.FilterComparison.QUERY_STRING, DataFilter.CombinationMode.SHOULD);
+			mIR = QAController.getInstance().getObjects(df, comp);
+			
+			break;
 		case 0:
 			comp = new DateComparator();
-			datafilter.setTypeFilter(ItemType.Question);
-			mIR = QAController.getInstance().getObjects(datafilter, comp);
+			df.setTypeFilter(ItemType.Question);
+			df.setMaxResults(new Integer(MAX_RESULTS));
+			mIR = QAController.getInstance().getObjects(df, comp);
 			break;
 		case 1:
 			comp = new DateComparator();
 			comp.setCompareDirection(SortDirection.Descending);
-			datafilter.addFieldFilter(AuthoredItem.FIELD_AUTHOR, QAController.getInstance().getUserContext().getUserName(), FilterComparison.EQUALS);
-			mIR = QAController.getInstance().getObjects(datafilter, comp);
+			df.addFieldFilter(AuthoredItem.FIELD_AUTHOR, QAController.getInstance().getUserContext().getUserName(), FilterComparison.EQUALS);
+			mIR = QAController.getInstance().getObjects(df, comp);
 			break;
 		case 2:
 			mIR = QAController.getInstance().getFavorites();
 			break;
 		case 3:
 			comp = new UpvoteComparator();
-			datafilter.setTypeFilter(ItemType.Question);
-			mIR = QAController.getInstance().getObjects(datafilter, comp);
+			df.setTypeFilter(ItemType.Question);
+			mIR = QAController.getInstance().getObjects(df, comp);
 			break;	
 		case 4:
 			comp = new UpvoteComparator();
-			datafilter.setTypeFilter(ItemType.Answer);
-			mIR = QAController.getInstance().getObjects(datafilter, comp);
+			df.setTypeFilter(ItemType.Answer);
+			mIR = QAController.getInstance().getObjects(df, comp);
 			break;
 		case 5:
 			mIR = QAController.getInstance().getRecentItems();
@@ -90,14 +112,10 @@ public class ListFragment extends Fragment {
 		addObserver(mIR);		
 		ListView qList = (ListView) rootView.findViewById(R.id.questionListView);
 		qList.setOnItemClickListener(new listItemClickedListener());
-		mItems = new ArrayList<QAModel>();
+		
 		if (mIR != null) {
-			mItems.addAll(mIR.getCurrentResults());
-			mAdapter = new QuestionListAdapter(ListFragment.this.getActivity(), R.id.questionListView, mItems);
-			qList.setAdapter(mAdapter);
+			qList.setAdapter(new QuestionListAdapter(ListFragment.this.getActivity(), R.id.questionListView, mIR.getCurrentResults()));
 		}
-
-		qList.setOnScrollListener(new InfiniteScoller());
 		
 		return rootView;
     }
@@ -113,14 +131,18 @@ public class ListFragment extends Fragment {
 	 */
 	private void handleListViewItemClick(AdapterView<?> av, View view, int i, long l) {
 		QAModel qaModel = mIR.getCurrentResults().get(i);
-		QuestionItem question = (QuestionItem) qaModel;
-		if (question != null) {
-			QAController.getInstance().markRecentlyViewed(qaModel);
-			
-			Intent intent = new Intent(this.getActivity(), QuestionViewActivity.class);
-			intent.putExtra(QuestionViewActivity.QUESTION_ID_EXTRA, question.getUniqueId().toString());
-			startActivity(intent);
+
+		QAController.getInstance().markRecentlyViewed(qaModel);
+		
+		Intent intent = new Intent(this.getActivity(), QuestionViewActivity.class);
+		
+		if (qaModel instanceof AnswerItem) {
+			intent.putExtra(QuestionViewActivity.QUESTION_ID_EXTRA, ((AnswerItem) qaModel).getParentItem().toString());
 		}
+		else {
+			intent.putExtra(QuestionViewActivity.QUESTION_ID_EXTRA, qaModel.getUniqueId().toString());
+		}
+		startActivity(intent);
 	}
 	
 	/**
@@ -189,19 +211,23 @@ public class ListFragment extends Fragment {
 	 * @author Jared
 	 */
 	private void addObserver(IncrementalResult ir) {
+		
 		if (ir != null) {
 			ir.addObserver(new IIncrementalObserver() {
-	
+			
 				@Override
 				public void itemsArrived(List<QAModel> item, int index) {
 					Activity activity = ListFragment.this.getActivity();
 					if (activity == null) {
 						return;
 					}
+					ListView qList = (ListView) activity.findViewById(R.id.questionListView);
 
-					mItems.clear();
-					mItems.addAll(mIR.getCurrentResults());
-					mAdapter.notifyDataSetChanged();				
+					if (qList != null) {
+						qList.invalidate();
+						
+						qList.setAdapter(new QuestionListAdapter(ListFragment.this.getActivity(), R.id.questionListView, mIR.getCurrentResults()));
+					}					
 				}
 			});
 		}
@@ -280,38 +306,5 @@ public class ListFragment extends Fragment {
 			return convertView;
 		}
 	}
-
-	public class InfiniteScoller implements AbsListView.OnScrollListener {
-		int pageNo = 0;
-		int loadedItemCount = 0;
-		boolean isLoading;
-
-		/**
-		 * Queries elastic search for the specified pageNumber
-		 * @param pageNumber
-		 */
-		public void getPage(int pageNumber) {
-			datafilter.setPage(pageNumber);
-			QAController.getInstance().getObjectsWithResult(datafilter, mIR);
-		}
-
-		@Override
-		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-			 if (isLoading && (totalItemCount > loadedItemCount)) {
-				isLoading = false;
-				loadedItemCount = totalItemCount;
-				++pageNo;
-			 }
-
-			 if (!isLoading && (firstVisibleItem + visibleItemCount) >= totalItemCount) {
-				getPage(pageNo + 1);
-				isLoading = true;
-			 }
-		}
-
-		@Override
-		public void onScrollStateChanged(AbsListView view, int scrollState) {
-			return; // We don't do anything here right now
-		}
-	}
+	
 }
