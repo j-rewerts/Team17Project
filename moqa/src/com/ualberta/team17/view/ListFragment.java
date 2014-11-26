@@ -75,14 +75,14 @@ public class ListFragment extends Fragment {
 			
 			comp = new IdentityComparator();
 			
-			df = new DataFilter();
-			df.setTypeFilter(ItemType.Question);
-			df.setMaxResults(MAX_RESULTS);
-			df.addFieldFilter(AuthoredTextItem.FIELD_BODY, searchTerm, 
+			datafilter = new DataFilter();
+			datafilter.setTypeFilter(ItemType.Question);
+			datafilter.setMaxResults(MAX_RESULTS);
+			datafilter.addFieldFilter(AuthoredTextItem.FIELD_BODY, searchTerm, 
 					DataFilter.FilterComparison.QUERY_STRING, DataFilter.CombinationMode.SHOULD);
-			df.addFieldFilter(QuestionItem.FIELD_TITLE, searchTerm, 
+			datafilter.addFieldFilter(QuestionItem.FIELD_TITLE, searchTerm, 
 					DataFilter.FilterComparison.QUERY_STRING, DataFilter.CombinationMode.SHOULD);
-			mIR = QAController.getInstance().getObjects(df, comp);
+			mIR = QAController.getInstance().getObjects(datafilter, comp);
 			
 			break;
 		case 0:
