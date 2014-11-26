@@ -2,6 +2,7 @@ package com.ualberta.team17.datamanager;
 
 import io.searchbox.core.Search.Builder;
 import android.annotation.SuppressLint;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

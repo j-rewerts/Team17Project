@@ -1,13 +1,12 @@
 package com.ualberta.team17;
 
+import android.app.Application;
+import android.content.res.Resources;
+
 import com.ualberta.team17.controller.QAController;
 import com.ualberta.team17.datamanager.DataManager;
 import com.ualberta.team17.datamanager.LocalDataManager;
 import com.ualberta.team17.datamanager.NetworkDataManager;
-import com.ualberta.team17.datamanager.UserContext;
-
-import android.app.Application;
-import android.content.res.Resources;
 
 public class MoqaApplication extends Application {
 	@Override

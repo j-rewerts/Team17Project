@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Date;
 
 import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 
 /*
  * Represents an upvote of a given item
