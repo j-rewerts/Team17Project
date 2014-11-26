@@ -3,6 +3,7 @@ package com.ualberta.team17.view;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -15,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
 import com.ualberta.team17.R;
 import com.ualberta.team17.view.TaxonomyMenuFragment.OnItemSelectedListener;
 
@@ -28,6 +30,8 @@ import com.ualberta.team17.view.TaxonomyMenuFragment.OnItemSelectedListener;
  *
  */
 public class QuestionListActivity extends Activity implements OnItemSelectedListener{
+	public final static String SEARCH_TERM = "search_term";
+	
 	private String[] sortOptions;
 	private DrawerLayout rightDrawerLayout;
 	private ListView rightDrawerList;
@@ -35,6 +39,7 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 	TaxonomyMenuFragment leftDrawer = new TaxonomyMenuFragment();
 	SortMenuFragment rightDrawer = new SortMenuFragment();
 	ListFragment fragment = new ListFragment();
+	private int activeTaxonomy;
 
 	/**
 	 * Initializes data depending on what is passed in the intent. Creates adapters and
@@ -51,7 +56,26 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 			fragmentManager.beginTransaction().add(R.id.content_frame, leftDrawer).commit();
 			fragmentManager.beginTransaction().replace(R.id.content_frame, rightDrawer).commit();
 		}
+		
+		Intent intent = this.getIntent();
+		
+		if (intent == null) {
+			return;
+		}
+		
+		if (intent.getSerializableExtra(SEARCH_TERM) != null) {
+			String searchValue = (String) intent.getSerializableExtra(SEARCH_TERM);	
+			
+			Bundle args = new Bundle();
+			args.putString(SEARCH_TERM, searchValue);
+			fragment = new ListFragment();
+			FragmentManager fragmentManager = getFragmentManager();
+			fragment.setArguments(args);
+			fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+			setTitle(getResources().getText(R.string.action_search));
+		}
 	}
+	
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
 		super.onPostCreate(savedInstanceState);
@@ -59,7 +83,26 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 		leftDrawer.mDrawerToggle.syncState();
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		if (fragment != null) {
+			// update the main content by replacing fragments
+			String[] myTaxonomy = getResources().getStringArray(R.array.taxonomies);
+			Bundle args = new Bundle();
+			args.putInt(ListFragment.TAXONOMY_NUM, activeTaxonomy);
+			fragment = new ListFragment();
+			FragmentManager fragmentManager = getFragmentManager();
+			fragment.setArguments(args);
+			fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+			setTitle(myTaxonomy[activeTaxonomy]);
+		}
+	}
+	
 	private void selectItem(int position) {
+		activeTaxonomy = position;
+		
 		// update the main content by replacing fragments
 		String[] myTaxonomy = getResources().getStringArray(R.array.taxonomies);
 		Bundle args = new Bundle();

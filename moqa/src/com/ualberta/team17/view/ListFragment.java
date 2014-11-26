@@ -33,13 +33,14 @@ import com.ualberta.team17.datamanager.DataFilter.FilterComparison;
 import com.ualberta.team17.datamanager.IItemComparator.SortDirection;
 import com.ualberta.team17.datamanager.IncrementalResult;
 import com.ualberta.team17.datamanager.comparators.DateComparator;
+import com.ualberta.team17.datamanager.comparators.IdentityComparator;
 import com.ualberta.team17.datamanager.comparators.UpvoteComparator;
 
 @TargetApi(14)
 public class ListFragment extends Fragment {
 	public static final String TAXONOMY_NUM = "taxonomy_number";
 	public static final String FILTER_EXTRA = "FILTER";
-	
+	private static final int MAX_RESULTS = 10000;
 	private IncrementalResult mIR;
 	private DataFilter datafilter = new DataFilter();
 	private QuestionListAdapter mAdapter;
@@ -54,11 +55,33 @@ public class ListFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.activity_question_list, container, false);
-	    int mTaxonomy = getArguments().getInt(TAXONOMY_NUM);
+        
+        
+        
+	    int mTaxonomy = getArguments().getInt(TAXONOMY_NUM, -1);
 	    
 		IItemComparator comp;
 		
 		switch (mTaxonomy) {
+		case -1:
+			// This means it wasn't sent by a taxonomy.
+			// Must be a search.
+			String searchTerm = getArguments().getString(QuestionListActivity.SEARCH_TERM);
+			
+			if (searchTerm == null) {
+				break;
+			}
+			
+			comp = new IdentityComparator();
+			
+			df = new DataFilter();
+			df.setTypeFilter(ItemType.Question);
+			df.setMaxResults(MAX_RESULTS);
+			df.addFieldFilter("body", searchTerm, 
+					DataFilter.FilterComparison.QUERY_STRING, DataFilter.CombinationMode.SHOULD);
+			mIR = QAController.getInstance().getObjects(df, comp);
+			
+			break;
 		case 0:
 			comp = new DateComparator();
 			datafilter.setTypeFilter(ItemType.Question);
@@ -189,9 +212,10 @@ public class ListFragment extends Fragment {
 	 * @author Jared
 	 */
 	private void addObserver(IncrementalResult ir) {
+		
 		if (ir != null) {
 			ir.addObserver(new IIncrementalObserver() {
-	
+			
 				@Override
 				public void itemsArrived(List<QAModel> item, int index) {
 					Activity activity = ListFragment.this.getActivity();
