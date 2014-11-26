@@ -1,8 +1,8 @@
 package com.ualberta.team17.view;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,7 +47,7 @@ public class SearchItem extends LinearLayout {
 		ImageButton b = (ImageButton)this.findViewById(R.id.searchButton);
 		if (b != null) {
 			b.setImageResource(android.R.drawable.ic_menu_search);
-			b.setOnClickListener(new searchClickedListener());
+			b.setOnClickListener(new SearchClickedListener());
 		}		
 		
 		EditText et = (EditText)this.findViewById(R.id.searchBar);
@@ -120,12 +120,13 @@ public class SearchItem extends LinearLayout {
 	}	
 	
 	/**
-	 * Triggered whenever the search button is clicked.
+	 * Triggered whenever the search button is clicked. This is the default for SearchItem.
+	 * It should be replaced by calling setOnClickListener.
 	 * 
 	 * @author Jared
 	 *
 	 */
-	private class searchClickedListener implements OnClickListener {
+	private class SearchClickedListener implements OnClickListener {
 		
 		@Override
 		public void onClick(View view) {
@@ -137,12 +138,7 @@ public class SearchItem extends LinearLayout {
 				if (et != null) {
 					
 					if (et.isShown()) {
-						et.setVisibility(GONE);
-						
-						// Do search things then hide the bar.
-						Intent intent = new Intent(mContext, QuestionListActivity.class);
-						intent.putExtra(QuestionListActivity.SEARCH_TERM, et.getText().toString());
-						mContext.startActivity(intent);											
+						et.setVisibility(GONE);											
 					}
 					else {
 						// Show the bar and activate it

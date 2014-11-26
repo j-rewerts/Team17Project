@@ -1,10 +1,10 @@
 package com.ualberta.team17;
 
-import android.annotation.SuppressLint;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
+
+import android.annotation.SuppressLint;
 
 /**
  * Class for standard date formatting operations used in this application.

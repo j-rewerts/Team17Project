@@ -16,11 +16,11 @@ import com.ualberta.team17.StoragePolicy;
 import com.ualberta.team17.UniqueId;
 import com.ualberta.team17.UpvoteItem;
 import com.ualberta.team17.datamanager.DataFilter;
+import com.ualberta.team17.datamanager.DataFilter.FilterComparison;
 import com.ualberta.team17.datamanager.DataManager;
 import com.ualberta.team17.datamanager.IItemComparator;
 import com.ualberta.team17.datamanager.IncrementalResult;
 import com.ualberta.team17.datamanager.UserContext;
-import com.ualberta.team17.datamanager.DataFilter.FilterComparison;
 import com.ualberta.team17.datamanager.comparators.DateComparator;
 import com.ualberta.team17.datamanager.comparators.IdentityComparator;
 

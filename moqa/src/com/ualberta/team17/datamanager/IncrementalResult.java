@@ -7,6 +7,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.ualberta.team17.QAModel;
 import com.ualberta.team17.ItemType;
+import com.ualberta.team17.QAModel;
 
 /**
  * A synchronized ordered collection object that represents the results of a

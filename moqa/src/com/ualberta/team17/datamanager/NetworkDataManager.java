@@ -1,5 +1,11 @@
 package com.ualberta.team17.datamanager;
 
+import io.searchbox.client.JestClient;
+import io.searchbox.client.JestResult;
+import io.searchbox.core.Index;
+import io.searchbox.core.Search;
+import io.searchbox.core.SearchResult;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,31 +14,23 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import io.searchbox.client.JestClient;
-import io.searchbox.client.JestResult;
-import io.searchbox.core.Index;
-import io.searchbox.core.Search;
-import io.searchbox.core.SearchResult;
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.os.Build;
 
-import com.searchly.jestdroid.JestClientFactory;
-import com.searchly.jestdroid.DroidClientConfig;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
+import com.searchly.jestdroid.DroidClientConfig;
+import com.searchly.jestdroid.JestClientFactory;
 import com.ualberta.team17.AnswerItem;
 import com.ualberta.team17.AuthoredItem;
-import com.ualberta.team17.AuthoredTextItem;
 import com.ualberta.team17.CommentItem;
 import com.ualberta.team17.ItemType;
 import com.ualberta.team17.QAModel;
 import com.ualberta.team17.QuestionItem;
 import com.ualberta.team17.UniqueId;
 import com.ualberta.team17.UpvoteItem;
-import com.ualberta.team17.datamanager.comparators.DateComparator;
 
 /**
  * Manages all interaction with the Elastic Search server.

@@ -12,9 +12,11 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import com.ualberta.team17.R;
@@ -40,6 +42,7 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 	SortMenuFragment rightDrawer = new SortMenuFragment();
 	ListFragment fragment = new ListFragment();
 	private int activeTaxonomy;
+	boolean searchMode = false;
 
 	/**
 	 * Initializes data depending on what is passed in the intent. Creates adapters and
@@ -64,6 +67,7 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 		}
 		
 		if (intent.getSerializableExtra(SEARCH_TERM) != null) {
+			searchMode = true;
 			String searchValue = (String) intent.getSerializableExtra(SEARCH_TERM);	
 			
 			Bundle args = new Bundle();
@@ -88,6 +92,10 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 		super.onResume();
 		
 		if (fragment != null) {
+			if (searchMode) {
+				return;
+			}
+			
 			// update the main content by replacing fragments
 			String[] myTaxonomy = getResources().getStringArray(R.array.taxonomies);
 			Bundle args = new Bundle();
@@ -130,6 +138,8 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 		MenuItem mi = menu.findItem(R.id.action_search);
 		SearchItem si = new SearchItem(this.getBaseContext());
 		mi.setActionView(si);
+		
+		si.setOnClickListener(new SearchClickedListener());
 		return true;
 	}
 
@@ -156,7 +166,15 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 		return super.onOptionsItemSelected(item);
 	}
 
+	@Override
+	public void onItemSelected(int position) {
+		selectItem(position);
+	}
 
+	public void search(String searchTerm) {
+		
+	}
+	
 	public class SortMenuFragment extends Fragment {
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
@@ -191,9 +209,49 @@ public class QuestionListActivity extends Activity implements OnItemSelectedList
 
 	}
 	
-	@Override
-	public void onItemSelected(int position) {
-		selectItem(position);
-	}
+	
+	
+	/**
+	 * Triggered whenever the search button is clicked.
+	 * 
+	 * @author Jared
+	 *
+	 */
+	private class SearchClickedListener implements OnClickListener {
+		
+		@Override
+		public void onClick(View view) {
 
+			ViewGroup g = (ViewGroup) view.getParent();
+			if (g != null) {
+				
+				EditText et = (EditText) g.findViewById(R.id.searchBar);
+				if (et != null) {
+					
+					if (et.isShown()) {
+						et.setVisibility(View.GONE);
+						
+						String searchTerm = et.getText().toString();
+						if (searchTerm.equals("")) {
+							return;
+						}						
+
+						Bundle args = new Bundle();
+						args.putString(SEARCH_TERM, searchTerm);
+						fragment = new ListFragment();
+						FragmentManager fragmentManager = getFragmentManager();
+						fragment.setArguments(args);
+						fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+						setTitle(getResources().getText(R.string.action_search));
+																	
+					}
+					else {
+						// Show the bar and activate it
+						et.setVisibility(View.VISIBLE);
+						et.setSelected(true);
+					}							
+				}
+			}					
+		}
+	}
 }
