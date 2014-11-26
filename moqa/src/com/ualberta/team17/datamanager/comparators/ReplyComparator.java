@@ -2,7 +2,6 @@ package com.ualberta.team17.datamanager.comparators;
 
 import com.ualberta.team17.QAModel;
 import com.ualberta.team17.datamanager.IItemComparator;
-import com.ualberta.team17.datamanager.IItemComparator.SortDirection;
 
 public class ReplyComparator implements IItemComparator {
 	private SortDirection mCompareDirection = SortDirection.Ascending;

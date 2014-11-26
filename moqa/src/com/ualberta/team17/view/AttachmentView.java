@@ -3,10 +3,6 @@ package com.ualberta.team17.view;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ualberta.team17.AttachmentItem;
-import com.ualberta.team17.QuestionItem;
-import com.ualberta.team17.R;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -21,6 +17,10 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
+
+import com.ualberta.team17.AttachmentItem;
+import com.ualberta.team17.QuestionItem;
+import com.ualberta.team17.R;
 
 public class AttachmentView extends HorizontalScrollView {
 	private static final int LAYOUT_VIEW_ID = 98169460;

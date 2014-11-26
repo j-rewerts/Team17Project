@@ -3,8 +3,6 @@ package com.ualberta.team17;
 import java.io.IOException;
 import java.util.Date;
 
-import android.util.Log;
-
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 

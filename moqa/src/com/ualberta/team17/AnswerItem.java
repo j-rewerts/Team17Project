@@ -3,10 +3,7 @@ package com.ualberta.team17;
 import java.io.IOException;
 import java.util.Date;
 
-import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
-import com.google.gson.stream.JsonWriter;
 
 public class AnswerItem extends AuthoredTextItem {
 	/* Ctor */
