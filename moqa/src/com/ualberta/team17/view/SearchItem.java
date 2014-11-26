@@ -1,6 +1,7 @@
 package com.ualberta.team17.view;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -19,17 +20,20 @@ import com.ualberta.team17.R;
  *
  */
 public class SearchItem extends LinearLayout {
-    
-    boolean mShowSearchBar;
 	
+    private boolean mShowSearchBar;
+	private Context mContext;
+    
     public SearchItem(Context context) {
     	super(context);
+    	mContext = context;
     	
     	init();
     }
     
 	public SearchItem(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		mContext = context;
 		
 		init();
 	}
@@ -133,8 +137,12 @@ public class SearchItem extends LinearLayout {
 				if (et != null) {
 					
 					if (et.isShown()) {
-						// Do search things then hide the bar.
 						et.setVisibility(GONE);
+						
+						// Do search things then hide the bar.
+						Intent intent = new Intent(mContext, QuestionListActivity.class);
+						intent.putExtra(QuestionListActivity.SEARCH_TERM, et.getText().toString());
+						mContext.startActivity(intent);											
 					}
 					else {
 						// Show the bar and activate it
