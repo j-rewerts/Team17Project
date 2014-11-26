@@ -1,7 +1,8 @@
 package com.ualberta.team17.view;
 
+import android.app.Activity;
 import android.content.Context;
-import android.content.res.TypedArray;
+import android.content.Intent;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,17 +20,20 @@ import com.ualberta.team17.R;
  *
  */
 public class SearchItem extends LinearLayout {
-    
-    boolean mShowSearchBar;
 	
+    private boolean mShowSearchBar;
+	private Context mContext;
+    
     public SearchItem(Context context) {
     	super(context);
+    	mContext = context;
     	
     	init();
     }
     
 	public SearchItem(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		mContext = context;
 		
 		init();
 	}
@@ -43,7 +47,7 @@ public class SearchItem extends LinearLayout {
 		ImageButton b = (ImageButton)this.findViewById(R.id.searchButton);
 		if (b != null) {
 			b.setImageResource(android.R.drawable.ic_menu_search);
-			b.setOnClickListener(new searchClickedListener());
+			b.setOnClickListener(new SearchClickedListener());
 		}		
 		
 		EditText et = (EditText)this.findViewById(R.id.searchBar);
@@ -116,12 +120,13 @@ public class SearchItem extends LinearLayout {
 	}	
 	
 	/**
-	 * Triggered whenever the search button is clicked.
+	 * Triggered whenever the search button is clicked. This is the default for SearchItem.
+	 * It should be replaced by calling setOnClickListener.
 	 * 
 	 * @author Jared
 	 *
 	 */
-	private class searchClickedListener implements OnClickListener {
+	private class SearchClickedListener implements OnClickListener {
 		
 		@Override
 		public void onClick(View view) {
@@ -133,8 +138,7 @@ public class SearchItem extends LinearLayout {
 				if (et != null) {
 					
 					if (et.isShown()) {
-						// Do search things then hide the bar.
-						et.setVisibility(GONE);
+						et.setVisibility(GONE);											
 					}
 					else {
 						// Show the bar and activate it
